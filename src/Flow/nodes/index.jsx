@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import {
     Handle,
     Position,
@@ -10,6 +10,7 @@ import { ValueNode, MathNode } from './Math'
 import { IndicatorNode } from './Indicators'
 import { HHLLNode } from './hhll'
 import CoinNode from './CoinNode'
+import setVal from '../setValue'
 
 const CustomNode = ({ data, id, updateNode }) => {
     // Handler for input changes
@@ -72,9 +73,6 @@ const OPTIONS = [
     { value: ">=", name: ">= Greater Than or Equal To" }]
 
 const ConditionNode = memo(({ data, id, updateNode }) => {
-
-
-
     // SOURCES 
     const edges = useEdges().filter(_ => _.target == id)
     const nodesData = useNodesData(
@@ -82,29 +80,23 @@ const ConditionNode = memo(({ data, id, updateNode }) => {
     );
 
 
-    let inputes = {}
-    nodesData.forEach(_ => {
-        edges.forEach(e => {
-            if (e.source == _.id) {
-                Object.assign(inputes, { [e.targetHandle]: _.data.value })
-            }
-        })
-    })
-
-
     const getVal = (INPUT_ID = 1) => {
         const edge = edges.filter(e => e.targetHandle == INPUT_ID)?.[0]
         const val = nodesData.filter(e => e.id == edge?.source)?.[0]
-        
+
         if (!val?.data) return null
         return val.data.value[edge.sourceHandle]
     }
 
-
     // Handler for input changes
     const onInputChange = (event) => {
-        updateNode(id, [event.target.value, getVal(0), getVal(1)]);
+        updateNode(id, setVal(data.value, 2, event.target.value));
     };
+
+    useEffect(() => {
+        updateNode(id, setVal(data.value, 0, getVal(0) ?? null))
+        updateNode(id, setVal(data.value, 1, getVal(1) ?? null))
+    }, [edges])
 
 
     return <div
@@ -113,7 +105,7 @@ const ConditionNode = memo(({ data, id, updateNode }) => {
 
         <select
             type="text"
-            value={data.value || ''}
+            value={data.value[2] || ''}
             onChange={onInputChange}
             placeholder="Enter value"
             className="bg-white p-2 mx-2 rounded-xl"
@@ -160,7 +152,7 @@ const ConditionNode = memo(({ data, id, updateNode }) => {
             type="source"
             position={Position.Right}
             id={'source-' + id} // Another unique id
-            style={{ background: 'green', width: 15, height: 15 }}
+            style={{ background: 'violet', width: 15, height: 15 }}
         />
 
 

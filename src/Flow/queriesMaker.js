@@ -1,52 +1,52 @@
 var _obj = [
   {
-      "id": "1",
-      "label": "IndicatorNode 1",
-      "value": [
-          "talib.talib.EMA(close,15)(close,5)"
-      ],
-      "preNode": []
+    "id": "1",
+    "label": "IndicatorNode 1",
+    "value": [
+      "talib.talib.EMA(close,15)(close,5)"
+    ],
+    "preNode": []
   },
   {
-      "id": "3",
-      "label": "CoinNode 3",
-      "value": [
+    "id": "3",
+    "label": "CoinNode 3",
+    "value": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume"
+    ],
+    "type": "coin_data",
+    "preNode": []
+  },
+  {
+    "id": "2",
+    "label": "ConditionNode 2",
+    "value": ">",
+    "type": "check",
+    "preNode": [
+      {
+        "id": "1",
+        "label": "IndicatorNode 1",
+        "value": [
+          "talib.talib.EMA(close,15)(close,5)"
+        ]
+      },
+      {
+        "id": "3",
+        "label": "CoinNode 3",
+        "value": [
           "time",
           "open",
           "high",
           "low",
           "close",
           "volume"
-      ],
-      "type": "coin_data",
-      "preNode": []
-  },
-  {
-      "id": "2",
-      "label": "ConditionNode 2",
-      "value": ">",
-      "type": "check",
-      "preNode": [
-          {
-              "id": "1",
-              "label": "IndicatorNode 1",
-              "value": [
-                  "talib.talib.EMA(close,15)(close,5)"
-              ]
-          },
-          {
-              "id": "3",
-              "label": "CoinNode 3",
-              "value": [
-                  "time",
-                  "open",
-                  "high",
-                  "low",
-                  "close",
-                  "volume"
-              ]
-          }
-      ]
+        ]
+      }
+    ]
   }
 ]
 //  # Inputs containing steps and conditions
@@ -61,6 +61,9 @@ var _obj = [
 //  # Initialize the output dictionary
 //  output = {}
 
+const isNum = _ => !isNaN(Number(_))
+
+
 const queriesMaker = (obj) => {
   // Validate the input object
   // if (typeof obj !== 'object' || obj === null) {
@@ -73,11 +76,11 @@ const queriesMaker = (obj) => {
   // Example logic for processing the input object
   for (const key in obj) {
     if (Object.hasOwnProperty.call(obj, key)) {
-      
+
       var $ = obj[key];
-      
+
       let query = $.value[0];
-      const find_id = ID => obj.findIndex(_=> _.id == ID)
+      const find_id = ID => obj.findIndex(_ => _.id == ID)
       const input = INDEX => find_id($.preNode[INDEX]?.["id"])
       // console.log($.id);
 
@@ -88,14 +91,19 @@ const queriesMaker = (obj) => {
 
       // if ($.type == "hhll") {
       //   if($.preNode){
-          
+
       //   }
       //   console.log('asbsy',$);
       // }
-   
+
       if ($.type == "check") {
-        // if($.type == '')
-        query = `[output['${input(0)}'][i] ${$.value} output['${input(1)}'][i] for i in range(len(close)) if output['${input(0)}'][i] is not None]`;
+        const [val1, val2, condition] = $.value
+        if (isNum(val1) && isNum(val2)) { // both are numbers
+          query = `${val1} ${condition} ${val2}`;
+        } else {
+          query = `[output['${input(0)}'][i] ${condition} output['${input(1)}'][i] for i in range(len(close)) if output['${input(0)}'][i] is not None]`;
+        }
+
       }
 
       inputs[key] = query; // Process and store key-value pairs

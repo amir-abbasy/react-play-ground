@@ -231,12 +231,12 @@ function FlowExample() {
 
             <div className='absolute top-2'>
                 {[
+                    { name: "Coin", "add": () => addNode('CoinNode', { type: 'coin_data' }) },
                     { name: "Indicator", "add": () => addNode('IndicatorNode') },
                     { name: "Value", "add": () => addNode('ValueNode') },
                     { name: "Math", "add": () => addNode('MathNode', { type: 'math' }) },
                     { name: "Cond", "add": () => addNode('ConditionNode', { type: 'check' }) },
                     { name: "HHLL", "add": () => addNode('HHLLNode', { type: 'hhll' }) },
-                    { name: "Coin", "add": () => addNode('CoinNode', { type: 'coin_data' }) },
                     // { name: "Coin", "add": addNode('IndicatorNode', { type: 'coin_data' }) },
                 ].map((btn, idx) => <button onClick={btn.add} key={idx}
                     className='ml-2 border rounded-lg border-black px-2' >
