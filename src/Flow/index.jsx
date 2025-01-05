@@ -3,7 +3,7 @@ import { ReactFlow, addEdge, Handle, useEdgesState, useNodesState, Background, a
 // import Plot from './chart'
 import Plot from '../Chart/TradingChart'
 import '@xyflow/react/dist/style.css';
-import { ValueNode, MathNode, ConditionNode, IndicatorNode, HHLLNode, CoinNode, TradeNode, LogicalNode , MathUtils} from './nodes'
+import { ValueNode, MathNode, ConditionNode, IndicatorNode, HHLLNode, CoinNode, TradeNode, LogicalNode, MathUtils } from './nodes'
 import { queriesMaker } from './utils/queriesMaker';
 import { twMerge } from 'tailwind-merge';
 import mock_data from './chart/data.json'
@@ -138,12 +138,14 @@ function FlowExample() {
             id: `${nodes.length + 1}`, // Unique ID for the new node
             // type: 'default',
             type: node,
-            data: { label: `${data.name} ${nodes.length + 1}`, value: [], ...data },
+            node: node,
+            data: { label: `${data?.name ?? node} ${nodes.length + 1}`, value: [], ...data },
             position: {
                 x: Math.random() * 500, // Random x position
                 y: Math.random() * 500, // Random y position
             },
         };
+        // console.log({newNode});
         setNodes((nds) => [...nds, newNode]);
         closePaneMenu()
     };
@@ -199,7 +201,7 @@ function FlowExample() {
 
             //   console.log(`Executing Node: ${currentNode?.data.label}`);
             //   console.log(`Previous Node Values:`, previousNodeValues);
-            return { id: node.id, ...node.data, preNode };
+            return { id: node.id, node: node.node, type: node.type, ...node.data, preNode };
         });
 
         // console.log('Execution Order:', orderedOutput);
@@ -314,10 +316,13 @@ function FlowExample() {
                         </button>
 
                         <button
-                            className='m-2  bg-black p-2 px-10 text-gray-200 rounded-lg'
+                            className='m-2  bg-white p-2 px-10 text-gray-200 rounded-lg'
                             onClick={() => setState({ ...state, chart: !state.chart })}
                         >
-                            {state.chart ? "Chart On" : "Chart Off"}
+                            {/* {state.chart ? "Chart On" : "Chart Off"} */}
+                            <span class="material-symbols-outlined text-black">
+                                query_stats
+                            </span>
                         </button>
 
 
@@ -342,8 +347,17 @@ function FlowExample() {
                 </div>
 
 
-                {results && state.chart && <div className={`h-1/2 w-screen`}>
+                {results && state.chart && <div className={`h-1/2 w-screen overflow-y-scroll`}>
                     <Plot data={results} state={state.resultsOn} />
+                    <div className='text-black text-xs break-words text-wrap font-mono'>
+                        {Object.entries(JSON.parse(results?.outputs)).map((lg, key) => {
+                            const node = results.kahn_nodes[lg[0]]
+                            return <div key={key}>
+                                <p className='bg-black text-white px-2 w-fit'>{node?.['name'] + ' - ' + node?.['label']}</p>
+                                <p className='mb-2 px-2'>{JSON.stringify(lg[1])}</p>
+                            </div>
+                        })}
+                    </div>
                 </div>}
             </div>
 

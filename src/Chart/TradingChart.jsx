@@ -170,7 +170,7 @@ const Chart = ({ data: results, state }) => {
 
 
     // PLOT
-    const outputs = JSON.parse(results?.outputs)
+    const outputs = results?.outputs ? JSON.parse(results?.outputs) : null
     var component_layer = 0
     var line_layer = 0
 
@@ -649,7 +649,7 @@ const Chart = ({ data: results, state }) => {
 
 
           var BoundedType = ["RSI", "STOCH", "WILLR", "CCI", "MFI", "ADX", "STOCHRSI"]
-          var CenteredType = ["MACD", "MOM", "ROC", "AO", "TRIX"]
+          var CenteredType = ["MACD", "MOM", "ROC", "AO", "TRIX", "COS"]
           var UnboundeType = ["ATR", "OBV"]
           // var Percentage = ["ROC", "WILLR"]
 

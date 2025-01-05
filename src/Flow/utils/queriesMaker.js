@@ -17,12 +17,14 @@ const queriesMaker = (obj) => {
     if (Object.hasOwnProperty.call(obj, key)) {
       var $ = obj[key];
       let query = $.value[0];
+      
 
       const store_id = (ID) => obj.findIndex((_) => _.id == ID);
       const input = (INDEX) => store_id($.preNode[INDEX]?.["id"]);
-
+      
+      
       /////////////  COIN  /////////////
-      if ($.type == "coin_data") {
+      if ($.node == "CoinNode") {
         const [t, o, h, l, c, v, period, timeFrame] = $.value;
 
         let symbol = "BTC/USDT";
@@ -35,7 +37,7 @@ const queriesMaker = (obj) => {
 
       /////////////  MATH  /////////////
       /////////////  CHECK  /////////////
-      if ($.type == "check" || $.type == "math") {
+      if ($.node == "ConditionNode" || $.node == "MathNode") {
         // 10 (>,+) 20
         let [val1, val2, condition] = $.value;
         let vals = [val1, val2];
@@ -53,7 +55,7 @@ const queriesMaker = (obj) => {
         query = buildCheckQuery(vals[0], vals[1], condition, inputs);
       }
 
-      if ($.type == "math") {
+      if ($.node == "MathNode") {
         const [condition, ...vals] = $.value;
 
         $.preNode.map((_, k) => {
@@ -65,7 +67,7 @@ const queriesMaker = (obj) => {
         query = `${vals[0]} ${$.func["Value"]} ${vals[1]}`;
       }
 
-      if ($.type == "math_utils_np") {
+      if ($.node == "MathUtils") {
         const [func, ...vals] = $.value;
         // const source_length = $.preNode.length;
         // let vals = rest.slice(0, source_length);
@@ -85,8 +87,16 @@ const queriesMaker = (obj) => {
         }
       }
 
+      
+      
+      
+      
+      
+      
+      
+      
       /////////////  CHECK  /////////////
-      if ($.type == "logic") {
+      if ($.node == "LogicalNode") {
         // 10, AND, 20
         // np.logical_and(array1, array2)
         const [val1, val2, condition] = $.value;
@@ -95,7 +105,7 @@ const queriesMaker = (obj) => {
       }
 
       /////////////  INDICATOR  /////////////
-      if ($.type == "indicator") {
+      if ($.node == "IndicatorNode") {
         const [indicator, ...rest] = $.value;
 
         const source_length = $.preNode.length;
@@ -123,7 +133,7 @@ const queriesMaker = (obj) => {
       }
 
       /////////////  HH/LL  /////////////
-      if ($.type == "hhll") {
+      if ($.node == "HHLLNode") {
         const [fun, source, period] = $.value;
         query = `talib.${fun}(${value(source, input(0), false)}, ${period})`;
         if (fun == "support_resistance_levels") {
@@ -139,7 +149,7 @@ const queriesMaker = (obj) => {
       }
 
       /////////////  TRADE  /////////////
-      if ($.type == "trade") {
+      if ($.node == "TradeNode") {
         // const source_length = $.preNode.length;
         const source_length = 4;
         let vals = $.value.slice(0, source_length);
