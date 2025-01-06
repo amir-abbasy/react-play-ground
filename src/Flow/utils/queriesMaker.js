@@ -37,10 +37,19 @@ const queriesMaker = (obj) => {
 
       /////////////  MATH  /////////////
       /////////////  CHECK  /////////////
-      if ($.node == "ConditionNode" || $.node == "MathNode") {
-        // 10 (>,+) 20
+      if ($.node == "ConditionNode") {
+        // ==, !=, <, <=, >
+
         let [val1, val2, condition] = $.value;
         let vals = [val1, val2];
+
+        $.preNode.map((_, k) => {
+          var ID = store_id(_.id);
+          vals[k] = value(vals[k], ID, false);
+          return ID;
+        });
+
+        query = `${vals[0]} ${condition} ${vals[1]}`;
 
         // const inputs = $.preNode.map((_, k) => {
         //   if (!["coin_data", "indicator"].includes(_?.type)) {
@@ -51,8 +60,8 @@ const queriesMaker = (obj) => {
         //   return store_id(_.id);
         // });
 
-        const inputs = $.preNode.map((_, k) => store_id(_.id));
-        query = buildCheckQuery(vals[0], vals[1], condition, inputs);
+        // const inputs = $.preNode.map((_, k) => store_id(_.id));
+        // query = buildCheckQuery(vals[0], vals[1], condition, inputs);
       }
 
       if ($.node == "MathNode") {
@@ -77,10 +86,12 @@ const queriesMaker = (obj) => {
           vals[k] = value(vals[k], ID, false);
           return ID;
         });
-
-        // query = `talib.${indicator}(${[...vals, ...params].join(",")})`;
-        query = `np.${func}(${vals.join(",")})`;
-
+        
+        if ($.type == "Arithmetic_&_Logical_Ops") {
+          query = `np.${$.func["Value"]}(${vals.join(",")})`;
+        } else {
+          query = `np.${func}(${vals.join(",")})`;
+        }
         // RETURNS TO NAMED KEYS
         if ($.returns && $.returns.length > 0) {
           query += ` -> ${toSingleQuotes($.returns)}`;
